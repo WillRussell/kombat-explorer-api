@@ -14,13 +14,10 @@ request(
       );
 
       const collection = parseEventsList($, tableRows);
-      console.log(collection);
 
-      
-      // collection.forEach((item, i) => {
-      // 	console.log(item.title);
-      // 	console.log(item.location);
-      // });
+      collection.forEach((item, i) => {
+      	console.log(item);
+      });
     }
   }
 );

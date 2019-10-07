@@ -32,15 +32,16 @@ module.exports = function ($, data) {
 
     const eventTitle = eventNameArray[0];
     
-    const eventSubTitle = eventNameArray[eventNameArray.length - 1];
+    const eventSubTitle = eventNameArray[eventNameArray.length - 1].trim();
 
     const eventLocation = $(tableRow)
       .find("td[itemprop='location']")
-      .text();
+      .text()
+      .trim();
 
     const eventUrl = $(tableRow)
-      .find("td[itemprop='location']")
-      .text();
+      .find("td a[itemprop='url']")
+      .attr('href');
 
     const eventObj = {
       name: eventName,
@@ -52,6 +53,7 @@ module.exports = function ($, data) {
       month: month,
       day: day,
       year: year,
+      eventUrl: eventUrl,
     };
 
     list.push(eventObj);
