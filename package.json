@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.753.0",
     "cheerio": "^1.0.0-rc.3",
+    "dotenv": "^8.2.0",
     "moment": "^2.24.0",
-    "request": "^2.88.0"
+    "node-fetch": "^2.6.1"
   }
 }
