@@ -84,5 +84,4 @@ module.exports = function (html) {
   });
 
   return { eventName, promotion, unixDate, isoDate, shortDate, location, fights };
-  // return fights;
 }

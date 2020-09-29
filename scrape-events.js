@@ -4,9 +4,11 @@ const parseEventsList = require("./eventsParser");
 const moment = require("moment");
 const AWS = require("aws-sdk");
 const fetch = require("node-fetch");
+const { some } = require("lodash");
 
 const ufc = process.env["UFC_EVENTS_URI"];
 const bellator = process.env["BELLATOR_EVENTS_URI"];
+const oneFc = process.env["ONEFC_EVENTS_URI"];
 
 const s3 = new AWS.S3({
   accessKeyId: process.env["ACCESS_KEY_ID"],
@@ -17,6 +19,7 @@ const requests = async () => {
   return await Promise.all([
     fetch(ufc), 
     fetch(bellator),
+    fetch(oneFc),
   ]);
 };
 
@@ -24,17 +27,19 @@ async function fetchData() {
   const response = await requests();
   const rawUfcData = await response[0].text();
   const rawBellatorData = await response[1].text();
+  const rawOneFcData = await response[2].text();
 
   const mergedCollection = [
     ...parseEventsList(rawUfcData),
     ...parseEventsList(rawBellatorData),
+    ...parseEventsList(rawOneFcData),
   ];
 
   const sortedCollection = mergedCollection.sort(
     (a, b) => a.unixDate - b.unixDate
   );
 
-  const hasError = !response[0].ok || !response[1].ok;
+  const hasError = some(response, ['ok', false]);
 
   if (hasError) {
     throw new Error(
@@ -47,7 +52,7 @@ async function fetchData() {
 
 fetchData()
   .then((collection) => {
-    const created_at = moment().valueOf().toString();
+    const created_at = moment().valueOf();
     const calendar_date = moment().calendar();
     const fileObj = { created_at, calendar_date, collection };
     const json = JSON.stringify(fileObj);

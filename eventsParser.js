@@ -1,6 +1,6 @@
 const moment = require("moment");
 const cheerio = require("cheerio");
-const crypto = require("crypto");
+const { encrypt, md5sum } = require('./encryption-utils.js');
 
 module.exports = function (html) {
   const $ = cheerio.load(html);
@@ -51,12 +51,12 @@ module.exports = function (html) {
       .find("td a[itemprop='url']")
       .attr('href');
 
-    const md5sum = crypto.createHash('md5').update(eventUrl);
-    
-    const eventId = md5sum.digest('hex');
+    const eventId = md5sum(eventUrl);
+    const resourceId = encrypt(eventUrl);
 
     const eventObj = {
       id: eventId,
+      resourceId: resourceId,
       name: eventName,
       title: eventTitle,
       subtitle: eventSubTitle,
@@ -66,7 +66,6 @@ module.exports = function (html) {
       month: month,
       day: day,
       year: year,
-      eventUrl: eventUrl,
     };
 
     events.push(eventObj);

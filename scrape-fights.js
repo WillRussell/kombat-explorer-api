@@ -1,45 +1,60 @@
 require("dotenv").config();
 
-const parseFightsList = require("./fightsParser");
+const parseEventsList = require("./eventsParser");
+const fetchFightInfo = require("./upload-fight");
 const moment = require("moment");
 const AWS = require("aws-sdk");
 const fetch = require("node-fetch");
+const { performance } = require('perf_hooks');
 
-const fightUrl = 'https://www.sherdog.com/events/UFC-on-ESPN-16-Holm-vs-Aldana-87223';
+const t0 = performance.now();
 
 const s3 = new AWS.S3({
   accessKeyId: process.env["ACCESS_KEY_ID"],
   secretAccessKey: process.env["SECRET_ACCESS_KEY"],
 });
 
-const requests = async () => {
-  return await fetch(fightUrl);
+const params = {
+  Bucket: process.env["S3_BUCKET"],
+  Key: "events-collection.json",
 };
 
-async function fetchData() {
-  const response = await requests();
-  const rawPageData = await response.text();
-  const collection = parseFightsList(rawPageData);
+// Fetch the events list first.
+const s3download = () =>
+  new Promise((resolve, reject) => {
+    s3.getObject(params, function (err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
 
-  if (!response.ok) {
-    throw new Error(
-      `HTTP error! status: ${response.status}`
-    );
-  } else {
-    return await collection;
-  }
+function getRandomInt() {
+  const min = Math.ceil(20000);
+  const max = Math.floor(50000);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-fetchData()
-  .then((collection) => {
+s3download()
+  .then((data) => {
+    const { collection } = JSON.parse(Buffer.from(data.Body).toString("utf8"));
+    const resources = collection.map((fight) => fight.resourceId);
 
-    console.log(collection);
+    let promise = Promise.resolve();
 
-    // const created_at = moment().valueOf().toString();
-    // const calendar_date = moment().calendar();
-    // const fileObj = { created_at, calendar_date, collection };
-    // const json = JSON.stringify(fileObj);
+    resources.forEach(function (id) {
+      promise = promise.then(() => {
+        const interval = getRandomInt();
+        fetchFightInfo(id);
+        return new Promise((resolve) => setTimeout(resolve, interval));
+      });
+    });
 
-
+    promise.then(() => {
+      const t1 = performance.now();
+      console.log(`Fights collected in ${(t1 - t0)} milliseconds`);
+    });
   })
   .catch((e) => console.log(e));
