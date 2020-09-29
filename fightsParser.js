@@ -8,7 +8,6 @@ module.exports = function (html) {
 
   const baseSelection = $(".event_detail header .header");
 
-  // remove line break tag in the main event name
   baseSelection
   .find('.section_title h1')
   .find('br')
@@ -29,13 +28,15 @@ module.exports = function (html) {
   const location = eventMeta.find('.author span').text();
 
   const mainEvent = $(".fight_card .event .fight");
-  mainEvent.find('em').replaceWith(' '); // remove redudant 'Win - Loss - Draw' string
+  mainEvent.find('em').replaceWith(' ');
 
   const mainEventFighterOne = mainEvent.find('.left_side h3 a').text();
   const mainEventFighterOneRecord = mainEvent.find('.left_side .record').text().trim();
+  const mainEventFighterOneResult = mainEvent.find('.left_side .final_result').text().trim();
 
   const mainEventFighterTwo = mainEvent.find('.right_side h3 a').text();
   const mainEventFighterTwoRecord = mainEvent.find('.right_side .record').text().trim();
+  const mainEventFighterTwoResult = mainEvent.find('.right_side .final_result').text().trim();
 
   const mainEventFightName = $("section[itemprop='subEvent']")
     .find("meta[itemprop='name']")
@@ -46,10 +47,12 @@ module.exports = function (html) {
     fighterOne: {
       name: mainEventFighterOne,
       record: mainEventFighterOneRecord,
+      result: mainEventFighterOneResult,
     },
     fighterTwo: {
       name: mainEventFighterTwo,
       record: mainEventFighterTwoRecord,
+      result: mainEventFighterTwoResult,
     },
   });
 
@@ -62,23 +65,27 @@ module.exports = function (html) {
       .find("meta[itemprop='name']")
       .attr("content");
 
-    const fighterOne = $(tableRow).find(".col_first-fighter");
+    const fighterOne = $(tableRow).find(".text_right");
     const fighterOneName = $(fighterOne).find("a span").text();
     const fighterOneRecord = $(fighterOne).find(".record").text();
+    const fighterOneResult = $(fighterOne).find(".final_result").text();
 
     const fighterTwo = $(tableRow).find(".text_left");
     const fighterTwoName = $(fighterTwo).find("a span").text();
     const fighterTwoRecord = $(fighterTwo).find(".record").text();
+    const fighterTwoResult = $(fighterTwo).find(".final_result").text();
   
     fights.push({
       fightName,
       fighterOne: {
         name: fighterOneName,
         record: fighterOneRecord,
+        result: fighterOneResult,
       },
       fighterTwo: {
         name: fighterTwoName,
         record: fighterTwoRecord,
+        result: fighterTwoResult,
       },
     });
   });

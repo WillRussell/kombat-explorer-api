@@ -54,7 +54,8 @@ s3download()
 
     promise.then(() => {
       const t1 = performance.now();
-      console.log(`Fights collected in ${(t1 - t0)} milliseconds`);
+      const duration = moment.duration(t1 - t0).humanize();
+      console.log(`Fights collected in ${(duration)}`);
     });
   })
   .catch((e) => console.log(e));
