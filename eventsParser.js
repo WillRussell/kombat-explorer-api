@@ -6,7 +6,7 @@ module.exports = function (html) {
   const $ = cheerio.load(html);
 
   const tableRows = $(
-    "#events_list #upcoming_tab .event tbody .odd, #events_list #upcoming_tab .event tbody .even"
+    "#events_list #upcoming_tab .event tbody tr[itemScope='']"
   );
 
   const events = [];
@@ -18,18 +18,18 @@ module.exports = function (html) {
 
     const unixDate = moment(isoDate).valueOf();
 
-    const datetableRow = $(tableRow).find(".date");
+    const datetableRow = $(tableRow).find(".calendar-date");
 
     const month = $(datetableRow)
-      .find(".month")
+      .find("div:nth-child(1)")
       .text();
 
     const day = $(datetableRow)
-      .find(".day")
+      .find("div:nth-child(2)")
       .text();
 
     const year = $(datetableRow)
-      .find(".year")
+      .find("div:nth-child(3)")
       .text();
 
     const eventName = $(tableRow)
@@ -38,7 +38,7 @@ module.exports = function (html) {
 
     const eventNameArray = eventName.split("-");
 
-    const eventTitle = eventNameArray[0];
+    const eventTitle = eventNameArray[0].trim();
     
     const eventSubTitle = eventNameArray[eventNameArray.length - 1].trim();
 
