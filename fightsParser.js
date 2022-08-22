@@ -1,5 +1,6 @@
 const moment = require("moment");
 const cheerio = require("cheerio");
+const parseLocation = require("./locationParser");
 
 module.exports = function (html) {
   const $ = cheerio.load(html);
@@ -21,6 +22,8 @@ module.exports = function (html) {
   const shortDate = $(eventMeta).find("span:nth-child(1)").text();
 
   const location = eventMeta.find('span[itemprop="location"]').text();
+
+  const locationDetails = parseLocation(location);
 
   const mainEvent = $(".fight_card");
   mainEvent.find('fighter span em').replaceWith(' ');
@@ -87,5 +90,5 @@ module.exports = function (html) {
     });
   });
 
-  return { eventName, promotion, unixDate, isoDate, shortDate, location, fights };
+  return { eventName, promotion, unixDate, isoDate, shortDate, location, locationDetails, fights };
 }

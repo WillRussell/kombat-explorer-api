@@ -1,6 +1,7 @@
 const moment = require("moment");
 const cheerio = require("cheerio");
-const { encrypt, md5sum } = require('./encryption-utils.js');
+const { encrypt, md5sum } = require("./encryption-utils.js");
+const parseLocation = require("./locationParser");
 
 module.exports = function (html) {
   const $ = cheerio.load(html);
@@ -47,6 +48,8 @@ module.exports = function (html) {
       .text()
       .trim();
 
+    const locationDetails = parseLocation(eventLocation);
+
     const eventUrl = $(tableRow)
       .find("td a[itemprop='url']")
       .attr('href');
@@ -66,6 +69,7 @@ module.exports = function (html) {
       month: month,
       day: day,
       year: year,
+      locationDetails: locationDetails,
     };
 
     events.push(eventObj);
