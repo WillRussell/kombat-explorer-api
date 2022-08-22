@@ -6,16 +6,11 @@ module.exports = function (html) {
 
   const fights = [];
 
-  const baseSelection = $(".event_detail header .header");
+  const baseSelection = $(".event_detail div");
 
-  baseSelection
-  .find('.section_title h1')
-  .find('br')
-  .replaceWith(' ');
-
-  const eventName = baseSelection.find('.section_title h1').text();
-  const promotion = baseSelection.find('.section_title h2').text();
-  const eventMeta = baseSelection.find('.info .authors_info');
+  const eventName = baseSelection.find('h1 span[itemprop="name"]').text();
+  const promotion = baseSelection.find('.organization').text();
+  const eventMeta = baseSelection.find('.info');
 
   const isoDate = $(eventMeta)
     .find("meta[itemprop='startDate']")
@@ -23,24 +18,22 @@ module.exports = function (html) {
 
   const unixDate = moment(isoDate).valueOf();
 
-  const shortDate = eventMeta.find('.date').text();
+  const shortDate = $(eventMeta).find("span:nth-child(1)").text();
 
-  const location = eventMeta.find('.author span').text();
+  const location = eventMeta.find('span[itemprop="location"]').text();
 
-  const mainEvent = $(".fight_card .event .fight");
-  mainEvent.find('em').replaceWith(' ');
+  const mainEvent = $(".fight_card");
+  mainEvent.find('fighter span em').replaceWith(' ');
 
-  const mainEventFighterOne = mainEvent.find('.left_side h3 a').text();
+  const mainEventFighterOne = mainEvent.find('.left_side a').text().trim();
   const mainEventFighterOneRecord = mainEvent.find('.left_side .record').text().trim();
   const mainEventFighterOneResult = mainEvent.find('.left_side .final_result').text().trim();
 
-  const mainEventFighterTwo = mainEvent.find('.right_side h3 a').text();
+  const mainEventFighterTwo = mainEvent.find('.right_side h3 a').text().trim();
   const mainEventFighterTwoRecord = mainEvent.find('.right_side .record').text().trim();
   const mainEventFighterTwoResult = mainEvent.find('.right_side .final_result').text().trim();
 
-  const mainEventFightName = $("section[itemprop='subEvent']")
-    .find("meta[itemprop='name']")
-    .attr("content");
+  const mainEventFightName = $(".event_detail div h1 span[itemprop='name']").text().trim();
 
   fights.push({
     fightName: mainEventFightName,
@@ -57,7 +50,7 @@ module.exports = function (html) {
   });
 
   const underCardFights = $(
-    ".event_match .table table tbody .odd, .event_match .table table tbody .even"
+    ".new_table_holder .new_table tbody tr[itemProp='subEvent']"
   );
 
   underCardFights.each((i, tableRow) => {
@@ -66,12 +59,16 @@ module.exports = function (html) {
       .attr("content");
 
     const fighterOne = $(tableRow).find(".text_right");
-    const fighterOneName = $(fighterOne).find("a span").text();
+    fighterOne.find('br').replaceWith(' ');
+
+    const fighterOneName = $(fighterOne).find("a span[itemProp='name']").text();
     const fighterOneRecord = $(fighterOne).find(".record").text();
     const fighterOneResult = $(fighterOne).find(".final_result").text();
 
     const fighterTwo = $(tableRow).find(".text_left");
-    const fighterTwoName = $(fighterTwo).find("a span").text();
+    fighterTwo.find('br').replaceWith(' ');
+
+    const fighterTwoName = $(fighterTwo).find("a span[itemProp='name']").text();
     const fighterTwoRecord = $(fighterTwo).find(".record").text();
     const fighterTwoResult = $(fighterTwo).find(".final_result").text();
   
