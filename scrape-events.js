@@ -12,7 +12,7 @@ const bellator = process.env["BELLATOR_EVENTS_URI"];
 const oneFc = process.env["ONEFC_EVENTS_URI"];
 const pfl = process.env["PFL_EVENTS_URI"];
 const fury = process.env["FURY_FC_EVENTS_URI"];
-// const dwcs = process.env["CONTENDER_SERIES_EVENTS_URI"];
+const dwcs = process.env["CONTENDER_SERIES_EVENTS_URI"];
 
 
 const s3 = new AWS.S3({
@@ -29,7 +29,7 @@ const requests = async () => {
     fetch(oneFc),
     fetch(pfl),
     fetch(fury),
-    // fetch(dwcs),
+    fetch(dwcs),
   ]);
 };
 
@@ -40,7 +40,7 @@ async function fetchData() {
   const rawOneFcData = await response[2].text();
   const rawPflData = await response[3].text();
   const rawFuryData = await response[4].text();
-  // const rawDwcsData = await response[5].text();
+  const rawDwcsData = await response[5].text();
 
 
   const mergedCollection = [
@@ -49,7 +49,7 @@ async function fetchData() {
     ...parseEventsList(rawOneFcData),
     ...parseEventsList(rawPflData),
     ...parseEventsList(rawFuryData),
-    // ...parseEventsList(rawDwcsData),
+    ...parseEventsList(rawDwcsData),
   ];
 
   const sortedCollection = mergedCollection.sort(
@@ -86,8 +86,15 @@ fetchData()
       else {
         const t1 = performance.now();
         const duration = moment.duration(t1 - t0).humanize();
-        console.log(`Events collected in ${(duration)}`);
-        console.log(results);
+        
+        /* Log some details on success*/
+        collection.forEach((o) => { console.log(`${o.id} : ${o.title}, ${o.subtitle}`) });
+        console.log("-------------------------------------------------");
+        console.log(`Events collected: ${collection.length}`);
+        console.log(`Task duration: ${(duration)}`);
+        console.log("-------------------------------------------------");
+        console.log(results); // s3 tag
+        console.log("-------------------------------------------------");
       }
     });
   })
