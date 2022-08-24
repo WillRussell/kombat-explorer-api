@@ -1,5 +1,6 @@
 const moment = require("moment");
 const cheerio = require("cheerio");
+const { isEmpty } = require("lodash");
 const parseLocation = require("./locationParser");
 
 module.exports = function (html) {
@@ -28,25 +29,33 @@ module.exports = function (html) {
   const mainEvent = $(".fight_card");
   mainEvent.find('fighter span em').replaceWith(' ');
 
-  const mainEventFighterOne = mainEvent.find('.left_side a').text().trim();
-  const mainEventFighterOneRecord = mainEvent.find('.left_side .record').text().trim();
-  const mainEventFighterOneResult = mainEvent.find('.left_side .final_result').text().trim();
+  const getFighterRecord = (fighter) => fighter.find(".record").text().trim();
+  const getFighterResult = (fighter) => fighter.find(".final_result").text().trim();
 
-  const mainEventFighterTwo = mainEvent.find('.right_side h3 a').text().trim();
-  const mainEventFighterTwoRecord = mainEvent.find('.right_side .record').text().trim();
-  const mainEventFighterTwoResult = mainEvent.find('.right_side .final_result').text().trim();
+  const mainEventFighterOne = mainEvent.find(".left_side");
+  const mainEventFighterOneName = mainEventFighterOne.find("a").text().trim();
+  const mainEventFighterOneRecord = getFighterRecord(mainEventFighterOne);
+  const mainEventFighterOneResult = getFighterResult(mainEventFighterOne);
+
+  const mainEventFighterTwo = mainEvent.find(".right_side");
+  const mainEventFighterTwoName = mainEventFighterTwo.find("h3 a").text().trim();
+  const mainEventFighterTwoRecord = getFighterRecord(mainEventFighterTwo);
+  const mainEventFighterTwoResult = getFighterResult(mainEventFighterTwo);
 
   const mainEventFightName = $(".event_detail div h1 span[itemprop='name']").text().trim();
+
+  const hasMainEvent =
+    !isEmpty(mainEventFighterOneName) && !isEmpty(mainEventFighterOneName);
 
   fights.push({
     fightName: mainEventFightName,
     fighterOne: {
-      name: mainEventFighterOne,
+      name: mainEventFighterOneName,
       record: mainEventFighterOneRecord,
       result: mainEventFighterOneResult,
     },
     fighterTwo: {
-      name: mainEventFighterTwo,
+      name: mainEventFighterTwoName,
       record: mainEventFighterTwoRecord,
       result: mainEventFighterTwoResult,
     },
@@ -62,33 +71,35 @@ module.exports = function (html) {
       .attr("content");
 
     const fighterOne = $(tableRow).find(".text_right");
-    fighterOne.find('br').replaceWith(' ');
-
-    const fighterOneName = $(fighterOne).find("a span[itemProp='name']").text();
-    const fighterOneRecord = $(fighterOne).find(".record").text();
-    const fighterOneResult = $(fighterOne).find(".final_result").text();
-
     const fighterTwo = $(tableRow).find(".text_left");
+
+    fighterOne.find('br').replaceWith(' ');
     fighterTwo.find('br').replaceWith(' ');
 
-    const fighterTwoName = $(fighterTwo).find("a span[itemProp='name']").text();
-    const fighterTwoRecord = $(fighterTwo).find(".record").text();
-    const fighterTwoResult = $(fighterTwo).find(".final_result").text();
-  
-    fights.push({
+    const getFighterDetails = (fighter) => {
+      const name = $(fighter).find("a span[itemProp='name']").text();
+      const record = getFighterRecord(fighter);
+      const result = getFighterResult(fighter);
+      return { name, record, result };
+    };
+
+    const fightRecord = {
       fightName,
-      fighterOne: {
-        name: fighterOneName,
-        record: fighterOneRecord,
-        result: fighterOneResult,
-      },
-      fighterTwo: {
-        name: fighterTwoName,
-        record: fighterTwoRecord,
-        result: fighterTwoResult,
-      },
-    });
+      fighterOne: getFighterDetails(fighterOne),
+      fighterTwo: getFighterDetails(fighterTwo),
+    }
+
+    fights.push(fightRecord);
   });
 
-  return { eventName, promotion, unixDate, isoDate, shortDate, location, locationDetails, fights };
-}
+return {
+  eventName,
+  hasMainEvent,
+  promotion,
+  unixDate,
+  isoDate,
+  shortDate,
+  location,
+  locationDetails,
+  fights,
+};}
