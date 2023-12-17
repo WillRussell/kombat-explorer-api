@@ -50,7 +50,8 @@ module.exports = function (resourceId) {
       s3.putObject(params, (err, results) => {
         if (err) reject(err);
         else {
-          console.log(results);
+          const logObj = { event: fightCard.eventName, fightsStored: fightCard.fights.length, ...results };
+          console.log(logObj);
         }
       });
     })
