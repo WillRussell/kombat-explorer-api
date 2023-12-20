@@ -13,6 +13,9 @@ const oneFc = process.env["ONEFC_EVENTS_URI"];
 const pfl = process.env["PFL_EVENTS_URI"];
 const fury = process.env["FURY_FC_EVENTS_URI"];
 const dwcs = process.env["CONTENDER_SERIES_EVENTS_URI"];
+const fcf = process.env["FULL_CONTACT_FIGHTING_EVENTS_URI"];
+const ufca = process.env["UFC_APEX_EVENTS_URI"];
+
 
 
 const s3 = new AWS.S3({
@@ -30,6 +33,8 @@ const requests = async () => {
     fetch(pfl),
     fetch(fury),
     fetch(dwcs),
+    fetch(fcf),
+    fetch(ufca)
   ]);
 };
 
@@ -41,6 +46,8 @@ async function fetchData() {
   const rawPflData = await response[3].text();
   const rawFuryData = await response[4].text();
   const rawDwcsData = await response[5].text();
+  const rawFcfData = await response[6].text();
+  const rawUfcaData = await response[7].text();
 
 
   const mergedCollection = [
@@ -50,6 +57,8 @@ async function fetchData() {
     ...parseEventsList(rawPflData),
     ...parseEventsList(rawFuryData),
     ...parseEventsList(rawDwcsData),
+    ...parseEventsList(rawFcfData),
+    ...parseEventsList(rawUfcaData)
   ];
 
   const sortedCollection = mergedCollection.sort(
