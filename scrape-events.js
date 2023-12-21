@@ -7,16 +7,17 @@ const fetch = require("node-fetch");
 const { performance } = require('perf_hooks');
 const { some } = require("lodash");
 
-const ufc = process.env["UFC_EVENTS_URI"];
-const bellator = process.env["BELLATOR_EVENTS_URI"];
-const oneFc = process.env["ONEFC_EVENTS_URI"];
-const pfl = process.env["PFL_EVENTS_URI"];
-const fury = process.env["FURY_FC_EVENTS_URI"];
-const dwcs = process.env["CONTENDER_SERIES_EVENTS_URI"];
-const fcf = process.env["FULL_CONTACT_FIGHTING_EVENTS_URI"];
-const ufca = process.env["UFC_APEX_EVENTS_URI"];
-
-
+const eventUris = [
+  "UFC_EVENTS_URI",
+  "BELLATOR_EVENTS_URI",
+  "ONEFC_EVENTS_URI",
+  "PFL_EVENTS_URI",
+  "FURY_FC_EVENTS_URI",
+  "CONTENDER_SERIES_EVENTS_URI",
+  "FULL_CONTACT_FIGHTING_EVENTS_URI",
+  "UFC_APEX_EVENTS_URI",
+  "URIAH_FABER_A1_COMBAT_EVENTS_URI",
+];
 
 const s3 = new AWS.S3({
   accessKeyId: process.env["ACCESS_KEY_ID"],
@@ -26,46 +27,21 @@ const s3 = new AWS.S3({
 const t0 = performance.now();
 
 const requests = async () => {
-  return await Promise.all([
-    fetch(ufc), 
-    fetch(bellator),
-    fetch(oneFc),
-    fetch(pfl),
-    fetch(fury),
-    fetch(dwcs),
-    fetch(fcf),
-    fetch(ufca)
-  ]);
+  return await Promise.all(
+    eventUris.map(uri => fetch(process.env[uri]))
+  );
 };
 
 async function fetchData() {
-  const response = await requests();
-  const rawUfcData = await response[0].text();
-  const rawBellatorData = await response[1].text();
-  const rawOneFcData = await response[2].text();
-  const rawPflData = await response[3].text();
-  const rawFuryData = await response[4].text();
-  const rawDwcsData = await response[5].text();
-  const rawFcfData = await response[6].text();
-  const rawUfcaData = await response[7].text();
-
-
-  const mergedCollection = [
-    ...parseEventsList(rawUfcData),
-    ...parseEventsList(rawBellatorData),
-    ...parseEventsList(rawOneFcData),
-    ...parseEventsList(rawPflData),
-    ...parseEventsList(rawFuryData),
-    ...parseEventsList(rawDwcsData),
-    ...parseEventsList(rawFcfData),
-    ...parseEventsList(rawUfcaData)
-  ];
+  const responses = await requests();
+  const rawData = await Promise.all(responses.map(response => response.text()));
+  const mergedCollection = rawData.flatMap(rawDataItem => parseEventsList(rawDataItem));
 
   const sortedCollection = mergedCollection.sort(
     (a, b) => a.unixDate - b.unixDate
   );
 
-  const hasError = some(response, ['ok', false]);
+  const hasError = some(responses, ['ok', false]);
 
   if (hasError) {
     throw new Error(
