@@ -16,7 +16,9 @@ async function scrapeCalendar() {
   $('table tr').each((i, element) => {
     const onclickValue = $(element).attr('onclick');
     if (onclickValue && onclickValue.startsWith('document.location=')) {
-      const url = onclickValue.replace('document.location=', '').replace(/['"]/g, '');
+      // const url = onclickValue.replace('document.location=', '').replace(/['"]/g, '');
+      const url = onclickValue.replace('document.location=', '').replace(/['"]/g, '').trim().replace(/;$/, '');
+      console.log(`${baseUri}${url}`);
       eventUrls.push(`${baseUri}${url}`);
     }
   });
