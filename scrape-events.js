@@ -1,13 +1,15 @@
 require('dotenv').config();
 
 const moment = require('moment');
+const fs = require('fs');
 const S3 = require('aws-sdk/clients/s3');
 const fetch = require('node-fetch');
 const { performance } = require('perf_hooks');
 const { some } = require('lodash');
 const parseEventsList = require('./eventsParser');
 
-const eventUris = process.env.URI_COLLECTION.split(',');
+const orgCollection = fs.readFileSync('organizationLinks.json', 'utf8');
+const eventUris = JSON.parse(orgCollection);
 
 const s3 = new S3({
   accessKeyId: process.env.ACCESS_KEY_ID,
@@ -17,7 +19,7 @@ const s3 = new S3({
 const t0 = performance.now();
 
 const requests = async () => Promise.all(
-  eventUris.map((uri) => fetch(process.env[uri])),
+  eventUris.map((uri) => fetch(uri)),
 );
 
 async function fetchData() {
