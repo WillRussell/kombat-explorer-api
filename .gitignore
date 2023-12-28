@@ -7,4 +7,5 @@
 .env.test.local
 .env.production.local
 eventUrls.json
+organizationLinks.json
 
